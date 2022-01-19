@@ -10,9 +10,11 @@ from rest_framework.response import Response
 class CaptchaProvider(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
-        width = int(self.request.query_params.get('width'))
-        height = int(self.request.query_params.get('height'))
+    def post(self, request, *args, **kwargs):
+        width = int(self.request.data.get('width'))
+        height = int(self.request.data.get('height'))
+        captcha_text = self.request.data.get('text')
+        is_reveresed = self.request.data.get('is_reveresed')
 
         image = ImageCaptcha(
             width=width,
@@ -22,7 +24,7 @@ class CaptchaProvider(CreateAPIView):
             ])
 
         # Image captcha text
-        captcha_text = 'همطاف'
+        captcha_text = captcha_text[::-1] if not is_reveresed else captcha_text
 
         # generate the image of the given text
         data = image.generate(captcha_text)
@@ -32,4 +34,7 @@ class CaptchaProvider(CreateAPIView):
         with open('CAPTCHA.png', "rb") as img_file:
             my_string = base64.b64encode(img_file.read())
 
-        return Response(data=my_string.decode('utf-8'), status=status.HTTP_200_OK)
+        return Response(data=
+                        {
+                            'data': my_string.decode('utf-8')
+                        }, status=status.HTTP_200_OK)
