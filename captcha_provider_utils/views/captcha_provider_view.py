@@ -1,4 +1,5 @@
 import base64
+from pathlib import Path
 
 from captcha.image import ImageCaptcha
 from rest_framework import status
@@ -15,12 +16,15 @@ class CaptchaProvider(CreateAPIView):
         height = int(self.request.data.get('height'))
         captcha_text = self.request.data.get('text')
         is_reveresed = self.request.data.get('is_reveresed')
+        language = self.request.data.get('language')
+        font = self.request.data.get('font') + ".TTF"
 
         image = ImageCaptcha(
             width=width,
             height=height,
             fonts=[
-                '/home/maedeh/Documents/Codes/Django/captcha_provider_workspace/captcha_provider/fonts/B-NAZANIN.TTF',
+                r'/home/maedeh/Documents/Codes/Django/captcha_provider_workspace/captcha_provider/fonts/{font_name}'.format(
+                    font_name=font),
             ])
 
         # Image captcha text
@@ -35,6 +39,6 @@ class CaptchaProvider(CreateAPIView):
             my_string = base64.b64encode(img_file.read())
 
         return Response(data=
-                        {
-                            'data': my_string.decode('utf-8')
-                        }, status=status.HTTP_200_OK)
+        {
+            'data': my_string.decode('utf-8')
+        }, status=status.HTTP_200_OK)
